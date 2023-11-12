@@ -1,0 +1,574 @@
+openapi: 3.0.0
+info:
+  title: Movie information API 3.0
+  description: The purpose of this API is to assist students with their assignment work in the QUT Web Computing units for 2023. Its functionality includes a limited set of REST endpoints that facilitate CRUD operations on a database containing publicly accessible IMDB movies data.
+  version: 1.0.0
+
+components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+paths:
+  /movies/search:
+    get:
+      tags: 
+        - Movies
+      description: Returns a list of movie data. The list is arranged by imdbId, in ascending order.
+      operationId: searchMovies
+      parameters:
+        - in: query
+          name: title
+          schema:
+            type: string
+          description: Text to search for in the primary title of the movie.
+        - in: query
+          name: year
+          schema:
+            type: string
+          description: The year of initial release of the movie
+        - in: query
+          name: page
+          schema:
+            type: string
+          description: Page number
+      responses:
+        '200':
+          description: An array of objects containing title, year, imdbID, imdbRating, rottenTomatoesRating, metacriticRating and classification properties. The results are limited to 100 per page. An example of one object in the array is shown below.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          title:
+                            type: string
+                            example: "Star Trek: First Contact"
+                          year:
+                            type: integer
+                            format: int32
+                            example: 1996
+                          imdbID:
+                            type: string
+                            example: tt0117731
+                          imdbRating:
+                            type: number
+                            example: 7.6
+                          rottenTomatoesRating:
+                            type: integer
+                            format: int32
+                            example: 92
+                          metacriticRating:
+                            type: integer
+                            format: int32
+                            example: 71
+                          classification:
+                            type: string
+                            example: PG-13
+                    pagination:
+                      type: object
+                      properties:
+                        total:
+                          type: integer
+                          format: int32
+                          example: 6
+                        lastPage:
+                          type: integer
+                          format: int32
+                          example: 1
+                        perPage:
+                          type: integer
+                          format: int32
+                          example: 100
+                        currentPage:
+                          type: integer
+                          format: int32
+                          example: 1
+                        from:
+                          type: integer
+                          format: int32
+                          example: 0
+                        to:
+                          type: integer
+                          format: int32
+                          example: 6
+        '400':
+          description: Invalid year query parameter. Click on 'Schema' below to see the possible error responses.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Invalid year format. Format must be yyyy.
+  /movies/data/{imdbID}:
+    get:
+      tags: 
+        - Movies
+      description: Get data for a movie by imdbID
+      operationId: searchMoviesById
+      parameters:
+        - in: path
+          name: imdbID
+          required: true
+          schema:
+            type: string
+          description: The imdbID of the movie
+      responses:
+        '200':
+          description: An object containing the data for the movie.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: "Star Trek: First Contact"
+                  year:
+                    type: integer
+                    format: int32
+                    example: 1996
+                  runtime:
+                    type: integer
+                    format: int32
+                    example: 111
+                  genres:
+                    type: array
+                    items:
+                      type: string
+                      example: Action
+                  country:
+                    type: string
+                    example: United States
+                  principals:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: nm0005772
+                        category:
+                          type: string
+                          example: cinematographer
+                        name:
+                          type: string
+                          example: Matthew F. Leonetti
+                        characters:
+                          type: array
+                          items:
+                            type: string
+                            format: nullable
+                  ratings:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        source:
+                          type: string
+                          example: Internet Movie Database
+                        value:
+                          type: number
+                          example: 7.6
+                  boxoffice:
+                    type: integer
+                    format: int32
+                    example: 92027888
+                  poster:
+                    type: string
+                    example: https://m.media-amazon.com/images/M/MV5BYzMzZmE3MTItODYzYy00YWI5LWFkNWMtZTY5NmU2MDkxYWI1XkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_SX300.jpg
+                  plot:
+                    type: string
+                    example: The Borg travel back in time intent on preventing Earth's first contact
+                      with an alien species. Captain Picard and his crew pursue them to ensure
+                      that Zefram Cochrane makes his maiden flight reaching warp speed.
+        '400':
+          description: Invalid query parameters. Click on 'Schema' to see possible error responses.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Invalid year format. Format must be yyyy.
+        '404':
+          description: The requested movie could not be found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Invalid year format. Format must be yyyy.
+  /people/{id}:
+    get:
+      tags: 
+        - People
+      description: Get data for a movie by imdbID
+      operationId: findPeopleById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The imdbID of the movie
+      responses:
+        '401':
+          description: Unauthorized. Click on 'Schema' below to see the possible error responses.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Authorization header ('Bearer token') not found.
+        '404':
+          description: The requested person could not be found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: No record exists of a person with this ID.
+        '200':
+          description: An object containing data about that person
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: Patrick Stewart
+                  birthYear:
+                    type: integer
+                    format: int32
+                    example: 1940
+                  deathYear:
+                    type: string
+                    format: nullable
+                  roles:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        movieName:
+                          type: string
+                          example: "Star Trek: First Contact"
+                        movieId:
+                          type: string
+                          example: tt0117731
+                        category:
+                          type: string
+                          example: actor
+                        characters:
+                          type: array
+                          items:
+                            type: string
+                            example: Picard
+                        imdbRating:
+                          type: number
+                          example: 7.6
+        '400':
+          description: Invalid query parameters. Click on 'Schema' to see possible error responses.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Invalid query params - year. Query parameters are not permitted.
+  /user/register:
+    post:
+      tags: 
+        - Authentication
+      description: Creates a new user account. A request body containing the user to be registered must be sent.
+      operationId: registerUser
+      requestBody:
+        description: An object containing the email and password of the user to be registered.
+        content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    example: mike@gmail.com
+                  password:
+                    type: string
+                    example: password
+      responses:
+        '201':
+          description: User successfully created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    example: User created
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Request body incomplete, both email and password are required.
+  /user/login:
+    post:
+      tags: 
+        - Authentication
+      description: Log in to an existing user account. A request body containing the user credentials must be sent. The longExpiry bool is a setting for development use only that makes both tokens expire after a year.
+      operationId: loginUser
+      requestBody:
+        description: The credentials of the user to log in.
+        content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    example: mike@gmail.com
+                  password:
+                    type: string
+                    example: password
+      responses:
+        '200':
+          description: Log in successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bearerToken:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: ajsonwebtoken
+                      token_type:
+                        type: string
+                        example: Bearer
+                      expires_in:
+                        type: integer
+                        format: int32
+                        example: 600
+                  refreshToken:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: ajsonwebtoken
+                      token_type:
+                        type: string
+                        example: Refresh
+                      expires_in:
+                        type: integer
+                        format: int32
+                        example: 86400
+        '400':
+          description: Invalid log in request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Request body incomplete, both email and password are required.
+        '401':
+          description: Log in failed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Incorrect email or password.
+
+  /user/refresh:
+    post:
+      tags: 
+        - Authentication
+      description: Obtain a new bearer token by using a refresh token.
+      operationId: refreshUser
+      requestBody:
+        description: The refresh token
+        content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  refreshToken:
+                    type: string
+                    example: ajsonwebtoken
+      responses:
+        '200':
+          description: Token successfully refreshed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bearerToken:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: ajsonwebtoken
+                      token_type:
+                        type: string
+                        example: Bearer
+                      expires_in:
+                        type: integer
+                        format: int32
+                        example: 600
+                  refreshToken:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: ajsonwebtoken
+                      token_type:
+                        type: string
+                        example: Refresh
+                      expires_in:
+                        type: integer
+                        format: int32
+                        example: 86400
+
+                    
+        '400':
+          description: Invalid refresh request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Request body incomplete, refresh token required.
+        '401':
+          description: Unauthorized. Click on 'Schema' below to see the possible error responses.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: JWT token has expired.
+
+  /user/logout:
+    post:
+      tags: 
+        - Authentication
+      description: Log the user out, invalidating the refresh token.
+      operationId: logoutUser
+      requestBody:
+        description: The refresh token.
+        content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  refreshToken:
+                    type: string
+                    example: ajsonwebtoken
+      responses:
+        '200':
+          description: Token successfully invalidated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Token successfully invalidated.
+        '400':
+          description: Invalid refresh request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Request body incomplete, refresh token required.
+        '401':
+          description: Unauthorized. Click on 'Schema' below to see the possible error responses.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: JWT token has expired.
+
